@@ -48,6 +48,7 @@ def _setupSSHDImpl(frpc_token):
   subprocess.Popen(['apt-get', 'update'])
   
   print("in cache")
+  cache = '1'
 
 
   #subprocess.run(["unminimize"], input = "y\n", check = True, universal_newlines = True)
