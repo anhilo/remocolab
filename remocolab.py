@@ -130,7 +130,7 @@ def _setupSSHDMain(check_gpu_available):
 
   print("---")
   print("input frp server:port")
-  frp_token = getpass.getpass()
+  frpc_token = getpass.getpass()
 
 
   return (True, _setupSSHDImpl(frpc_token))
