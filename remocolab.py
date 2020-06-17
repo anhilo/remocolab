@@ -96,7 +96,7 @@ def _setupSSHDImpl(frpc_token):
   # if not pathlib.Path('/root/.frpc2/frpc.yml').exists():
   #  subprocess.run(["./frpc", "authtoken", frpc_token])
   with open('.frpc.ini','w+') as f:
-    frp_server,frp_port = frp_token.split(':')
+    frp_server,frp_port = frpc_token.split(':')
     f.write("[common]\nserver_addr ="+frp_server+"\nserver_port ="+frp_port +"\n\n[ssh]\ntype = tcp \nlocal_ip=127.0.0.1\nlocal_port=22\nremote_port=36000\n")
 
   frpc_proc = subprocess.Popen(["./frp_0.33.0_linux_amd64/frpc", "-c", ".frpc.ini"])
