@@ -4,12 +4,13 @@ import secrets, json, re
 import IPython.utils.io
 
 def _installPkg(cache, name):
-  pkg = cache[name]
-  if pkg.is_installed:
-    print(f"{name} is already installed")
-  else:
-    print(f"Install {name}")
-    pkg.mark_install()
+  # pkg = cache[name]
+  # if pkg.is_installed:
+  #   print(f"{name} is already installed")
+  # else:
+  #   print(f"Install {name}")
+    # pkg.mark_install()
+  !apt install -y {name}
 
 def _installPkgs(cache, *args):
   for i in args:
@@ -43,19 +44,16 @@ def _check_gpu_available():
   return IPython.utils.io.ask_yes_no("Do you want to continue? [y/n]")
 
 def _setupSSHDImpl(frpc_token):
-  #apt-get update
-  #apt-get upgrade
+  
+  !apt-get update
+  !apt-get upgrade
   print("in cache")
-  cache = apt.Cache()
-  cache.update()
-  cache.open(None)
-  cache.upgrade()
-  cache.commit()
+
 
   subprocess.run(["unminimize"], input = "y\n", check = True, universal_newlines = True)
 
   _installPkg(cache, "openssh-server")
-  cache.commit()
+
 
   #Reset host keys
   for i in pathlib.Path("/etc/ssh").glob("ssh_host_*_key"):
@@ -210,13 +208,13 @@ def _setupVNC():
   _download(libjpeg_url, "libjpeg-turbo.deb")
   _download(virtualGL_url, "virtualgl.deb")
   _download(turboVNC_url, "turbovnc.deb")
-  cache = apt.Cache()
+ 
   apt.debfile.DebPackage("libjpeg-turbo.deb", cache).install()
   apt.debfile.DebPackage("virtualgl.deb", cache).install()
   apt.debfile.DebPackage("turbovnc.deb", cache).install()
 
   _installPkgs(cache, "xfce4", "xfce4-terminal")
-  cache.commit()
+
 
   vnc_sec_conf_p = pathlib.Path("/etc/turbovncserver-security.conf")
   vnc_sec_conf_p.write_text("""\
