@@ -104,23 +104,23 @@ def _setupSSHDImpl(frpc_token):
   if frpc_proc.poll() != None:
     raise RuntimeError("Failed to run frpc. Return code:" + str(frpc_proc.returncode) + "\nSee runtime log for more info.")
 
-  with urllib.request.urlopen("http://localhost:4040/api/tunnels") as response:
-    url = json.load(response)['tunnels'][0]['public_url']
-    m = re.match("tcp://(.+):(\d+)", url)
+  # with urllib.request.urlopen("http://localhost:4040/api/tunnels") as response:
+  #   url = json.load(response)['tunnels'][0]['public_url']
+  #   m = re.match("tcp://(.+):(\d+)", url)
 
-  hostname = m.group(1)
-  port = m.group(2)
+  # hostname = m.group(1)
+  # port = m.group(2)
 
   ssh_common_options =  "-o UserKnownHostsFile=/dev/null -o VisualHostKey=yes"
   msg += "---\n"
   msg += "Command to connect to the ssh server:\n"
   msg += "✂️"*24 + "\n"
-  msg += f"ssh {ssh_common_options} -p {port} {user_name}@{hostname}\n"
+  msg += f"ssh {ssh_common_options} -p {frp_port} {user_name}@{frp_server}\n"
   msg += "✂️"*24 + "\n"
   msg += "---\n"
   msg += "If you use VNC:\n"
   msg += "✂️"*24 + "\n"
-  msg += f"ssh {ssh_common_options} -L 5901:localhost:5901 -p {port} {user_name}@{hostname}\n"
+  msg += f"ssh {ssh_common_options} -L 5901:localhost:5901 -p {frp_port} {user_name}@{frp_server}\n"
   msg += "✂️"*24 + "\n"
   return msg
 
