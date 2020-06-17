@@ -42,7 +42,7 @@ def _check_gpu_available():
 
   return IPython.utils.io.ask_yes_no("Do you want to continue? [y/n]")
 
-def _setupSSHDImpl(ngrok_token, ngrok_region):
+def _setupSSHDImpl(frpc_token):
   #apt-get update
   #apt-get upgrade
   cache = apt.Cache()
@@ -76,9 +76,9 @@ def _setupSSHDImpl(ngrok_token, ngrok_region):
                 universal_newlines = True)
   msg += ret.stdout + "\n"
 
-  _download("https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip", "ngrok.zip")
-  shutil.unpack_archive("ngrok.zip")
-  pathlib.Path("ngrok").chmod(stat.S_IXUSR)
+  _download("https://github.com/fatedier/frp/releases/download/v0.33.0/frp_0.33.0_linux_amd64.tar.gz", "frp_0.33.0_linux_amd64.tar.gz")
+  shutil.unpack_archive("frp_0.33.0_linux_amd64.tar.gz",'','gztar')
+  #pathlib.Path("frp_0.33.0_linux_amd64").chmod(stat.S_IXUSR)
 
   root_password = secrets.token_urlsafe()
   user_password = secrets.token_urlsafe()
@@ -93,13 +93,16 @@ def _setupSSHDImpl(ngrok_token, ngrok_region):
   subprocess.run(["chpasswd"], input = f"{user_name}:{user_password}", universal_newlines = True)
   subprocess.run(["service", "ssh", "restart"])
 
-  if not pathlib.Path('/root/.ngrok2/ngrok.yml').exists():
-    subprocess.run(["./ngrok", "authtoken", ngrok_token])
+  # if not pathlib.Path('/root/.frpc2/frpc.yml').exists():
+  #  subprocess.run(["./frpc", "authtoken", frpc_token])
+  with open('.frpc.ini','w+') as f:
+    frp_server,frp_port = frp_token.split(':')
+    f.write("[common]\nserver_addr ="+frp_server+"\nserver_port ="+frp_port +"\n\n[ssh]\ntype = tcp \nlocal_ip=127.0.0.1\nlocal_port=22\nremote_port=36000\n")
 
-  ngrok_proc = subprocess.Popen(["./ngrok", "tcp", "-region", ngrok_region, "22"])
+  frpc_proc = subprocess.Popen(["./frp_0.33.0_linux_amd64/frpc", "-c", ".frpc.ini"])
   time.sleep(2)
-  if ngrok_proc.poll() != None:
-    raise RuntimeError("Failed to run ngrok. Return code:" + str(ngrok_proc.returncode) + "\nSee runtime log for more info.")
+  if frpc_proc.poll() != None:
+    raise RuntimeError("Failed to run frpc. Return code:" + str(frpc_proc.returncode) + "\nSee runtime log for more info.")
 
   with urllib.request.urlopen("http://localhost:4040/api/tunnels") as response:
     url = json.load(response)['tunnels'][0]['public_url']
@@ -121,31 +124,19 @@ def _setupSSHDImpl(ngrok_token, ngrok_region):
   msg += "✂️"*24 + "\n"
   return msg
 
-def _setupSSHDMain(ngrok_region, check_gpu_available):
+def _setupSSHDMain(check_gpu_available):
   if check_gpu_available and not _check_gpu_available():
     return (False, "")
 
   print("---")
-  print("Copy&paste your tunnel authtoken from https://dashboard.ngrok.com/auth")
-  print("(You need to sign up for ngrok and login,)")
-  #Set your ngrok Authtoken.
-  ngrok_token = getpass.getpass()
+  print("input frp server:port")
+  frp_token = getpass.getpass()
 
-  if not ngrok_region:
-    print("Select your ngrok region:")
-    print("us - United States (Ohio)")
-    print("eu - Europe (Frankfurt)")
-    print("ap - Asia/Pacific (Singapore)")
-    print("au - Australia (Sydney)")
-    print("sa - South America (Sao Paulo)")
-    print("jp - Japan (Tokyo)")
-    print("in - India (Mumbai)")
-    ngrok_region = region = input()
 
-  return (True, _setupSSHDImpl(ngrok_token, ngrok_region))
+  return (True, _setupSSHDImpl(frpc_token))
 
-def setupSSHD(ngrok_region = None, check_gpu_available = False):
-  s, msg = _setupSSHDMain(ngrok_region, check_gpu_available)
+def setupSSHD(check_gpu_available = False):
+  s, msg = _setupSSHDMain(check_gpu_available)
   print(msg)
 
 def _setup_nvidia_gl():
@@ -271,8 +262,8 @@ subprocess.run(
                     universal_newlines = True)
   return r.stdout
 
-def setupVNC(ngrok_region = None, check_gpu_available = True):
-  stat, msg = _setupSSHDMain(ngrok_region, check_gpu_available)
+def setupVNC(check_gpu_available = True):
+  stat, msg = _setupSSHDMain(check_gpu_available)
   if stat:
     msg += _setupVNC()
 
