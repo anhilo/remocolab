@@ -10,7 +10,7 @@ def _installPkg(cache, name):
   # else:
   #   print(f"Install {name}")
     # pkg.mark_install()
-  !apt install -y {name}
+  subprocess.Popen(['apt','install', '-y', name])
 
 def _installPkgs(cache, *args):
   for i in args:
@@ -45,8 +45,8 @@ def _check_gpu_available():
 
 def _setupSSHDImpl(frpc_token):
   
-  !apt-get update
-  !apt-get upgrade
+  subprocess.Popen(['apt-get', 'update'])
+  
   print("in cache")
 
 
