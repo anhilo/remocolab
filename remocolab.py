@@ -45,6 +45,7 @@ def _check_gpu_available():
 def _setupSSHDImpl(frpc_token):
   #apt-get update
   #apt-get upgrade
+  print("in cache")
   cache = apt.Cache()
   cache.update()
   cache.open(None)
@@ -131,6 +132,7 @@ def _setupSSHDMain(check_gpu_available):
   print("---")
   print("input frp server:port")
   frpc_token = getpass.getpass()
+  print(frpc_token)
 
 
   return (True, _setupSSHDImpl(frpc_token))
