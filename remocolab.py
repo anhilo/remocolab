@@ -50,7 +50,7 @@ def _setupSSHDImpl(frpc_token):
   print("in cache")
 
 
-  subprocess.run(["unminimize"], input = "y\n", check = True, universal_newlines = True)
+  #subprocess.run(["unminimize"], input = "y\n", check = True, universal_newlines = True)
 
   _installPkg(cache, "openssh-server")
 
